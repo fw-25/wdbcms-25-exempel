@@ -7,7 +7,12 @@ PORT=8003
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-rooms = []
+# "List of dicts" i python är ungefär samma som en "array of objects" (i JS)
+rooms = [
+    { "number": 303, "type": "single", "price": 199.9 },
+    { "number": 404, "type": "double", "price": 350.1 },
+    { "number": 505, "type": "suite", "price": 500 }
+]
 
 @app.get("/rooms")
 def getRooms(request: Request):
