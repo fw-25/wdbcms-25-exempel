@@ -19,7 +19,10 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 
 @app.get("/temp")
 def temp():
-    return { "msg": "Hello" }
+    with conn.cursor() as cur:
+        cur.execute("SELECT * FROM messages")
+        messages = cur.fetchall()
+        return messages
 
 # "List of dicts" i python är ungefär samma som en "array of objects" (i JS)
 rooms = [
