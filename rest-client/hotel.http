@@ -1,5 +1,8 @@
 @apiUrl = http://0.0.0.0:8003
 
+GET {{apiUrl}}/temp
+
+###
 GET {{apiUrl}}/rooms
 
 ###
