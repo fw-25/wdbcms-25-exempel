@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotell</title>
+</head>
+<body>
+    <h1>Boka rum</h1>
+
+    <select name="room_id">
+        <!-- loopa rummen som <option> -->
+    </select>
+
+    <script>
+        // sjävexekverande funktion
+        (async () => {
+           const resp = await fetch('http://vm4430.kaj.pouta.csc.fi:8003/rooms');
+           const rooms = await resp.json();
+
+           console.log(rooms);
+            
+        })();
+
+    </script>
+</body>
+</html>
