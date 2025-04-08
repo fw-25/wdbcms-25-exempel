@@ -43,6 +43,8 @@
             const resp = await fetch(`${API_URL}/rooms`);
             const rooms = await resp.json();
 
+            
+
             for (r of rooms) {
                 document.querySelector('#room_id').innerHTML += `
                     <option value="${r.id}">
@@ -59,6 +61,7 @@
             const resp = await fetch(`${API_URL}/bookings`);
             const bookings = await resp.json();
 
+            document.querySelector('#bookings').innerHTML = '';
             for (b of bookings) {
                 document.querySelector('#bookings').innerHTML += `
                     <li>id:${b.id} room:${b.room_id} guest_id:${b.room_id} from:${b.datefrom}</li>
@@ -87,6 +90,8 @@
             });
 
             console.log(await resp.json());
+
+            getBookings();
         }
 
         document.querySelector("#btn-submit").addEventListener('click', saveBooking);
