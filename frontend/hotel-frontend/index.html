@@ -1,27 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hotell</title>
 </head>
+
 <body>
     <h1>Boka rum</h1>
 
-    <select name="room_id">
+    <select id="room_id">
         <!-- loopa rummen som <option> -->
+    </select> 
+    <select id="guest_id">
+        <option value="1">Fredde</option>
+        <option value="2">Jane</option>
     </select>
 
-    <script>
-        // sjävexekverande funktion
-        (async () => {
-           const resp = await fetch('http://vm4430.kaj.pouta.csc.fi:8003/rooms');
-           const rooms = await resp.json();
+    <p id="dates">
+        Tidpunkt<br>
+        <input type="date" id="datefrom"> &ndash; 
+        <input type="date" id="dateto">
+    </p>
 
-           console.log(rooms);
-            
-        })();
+    <p>
+        Tilläggsinfo<br>
+        <textarea id="addinfo"></textarea>
+    </p>
+
+    <input type="button" id="btn-submit" value="Spara bokningen">
+
+
+
+    <script>
+        const API_URL = 'http://vm4430.kaj.pouta.csc.fi:8003';
+
+        // sjävexekverande funktion
+        async function getRooms() {
+            const resp = await fetch(`${API_URL}/rooms`);
+            const rooms = await resp.json();
+
+            for (r of rooms) {
+                document.querySelector('#room_id').innerHTML += `
+                    <option value="${r.id}">
+                        ${r.room_number}
+                        ${r.type}
+                        ${r.price} €
+                    </option>
+                `;
+            }
+        };
+        getRooms();
+
+        async function saveBooking() {
+            datefrom = document.querySelector('#datefrom').value;
+            if (!datefrom) return alert('Du måste välja startdatum');
+
+            const booking = {
+                guest_id: Number(document.querySelector('#guest_id').value),
+                room_id: Number(document.querySelector('#room_id').value),
+                datefrom: datefrom,
+                dateto: document.querySelector('#dateto').value || datefrom
+            }
+
+            const resp = await fetch(`${API_URL}/bookings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(booking)
+            });
+
+            console.log(await resp.json());
+        }
+
+        document.querySelector("#btn-submit").addEventListener('click', saveBooking);
 
     </script>
 </body>
+
 </html>
