@@ -29,6 +29,9 @@
         <textarea id="addinfo"></textarea>
     </p>
 
+    <h3>Bokningar</h3>
+    <ul id="bookings"></ul>
+
     <input type="button" id="btn-submit" value="Spara bokningen">
 
 
@@ -36,7 +39,6 @@
     <script>
         const API_URL = 'http://vm4430.kaj.pouta.csc.fi:8003';
 
-        // sjävexekverande funktion
         async function getRooms() {
             const resp = await fetch(`${API_URL}/rooms`);
             const rooms = await resp.json();
@@ -52,6 +54,20 @@
             }
         };
         getRooms();
+
+        async function getBookings() {
+            const resp = await fetch(`${API_URL}/bookings`);
+            const bookings = await resp.json();
+
+            for (b of bookings) {
+                document.querySelector('#bookings').innerHTML += `
+                    <li>id:${b.id} room:${b.room_id} guest_id:${b.room_id} from:${b.datefrom}</li>
+                `;
+            }
+        };
+        getBookings();
+
+
 
         async function saveBooking() {
             datefrom = document.querySelector('#datefrom').value;
