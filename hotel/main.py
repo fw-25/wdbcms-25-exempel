@@ -33,6 +33,20 @@ def temp():
         messages = cur.fetchall()
         return messages
 
+# Get all guests
+@app.get("/guests")
+def get_rooms():
+    with conn.cursor() as cur:
+        cur.execute("""SELECT 
+                *,
+                (SELECT count(*) 
+                    FROM hotel_bookings 
+                    WHERE guest_id = hotel_guests.id) AS visits
+            FROM hotel_guests 
+            ORDER BY name""")
+        guests = cur.fetchall()
+        return guests
+
 # Get all rooms
 @app.get("/rooms")
 def get_rooms():
@@ -61,9 +75,19 @@ def get_one_room(id: int):
 def get_bookings():
     with conn.cursor() as cur:
         cur.execute("""
-            SELECT * 
-            FROM hotel_bookings
-            ORDER BY datefrom""")
+            SELECT 
+                hb.*,
+                (hb.dateto - hb.datefrom + 1) AS nights,
+                hr.room_number,
+                hr.price as price_per_night,
+                (hb.dateto - hb.datefrom + 1) * hr.price AS total_price,
+                hg.name AS guest_name
+            FROM hotel_bookings hb
+            INNER JOIN hotel_rooms hr 
+                ON hr.id = hb.room_id
+            INNER JOIN hotel_guests hg
+                ON hg.id = hb.guest_id
+            ORDER BY hb.id DESC""")
         bookings = cur.fetchall()
         return bookings
 
