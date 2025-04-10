@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from datetime import date
+from typing import Optional
+from datetime import date, timedelta 
+from markupsafe import escape
 
 PORT=8004
 
@@ -23,7 +25,8 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 class Booking(BaseModel):
     room_id: int
     datefrom: date # kräver: from datetime import date
-    dateto: date
+    dateto: Optional[date] = None
+    addinfo: Optional[str] = ""
     
 # Funktion för att validera API-key.    
 def validate_key(api_key: str = ""):
@@ -75,10 +78,10 @@ def get_bookings(guest: dict = Depends(validate_key)):
         cur.execute("""
             SELECT 
                 hb.*,
-                (hb.dateto - hb.datefrom + 1) AS nights,
+                (hb.dateto - hb.datefrom) AS nights,
                 hr.room_number,
                 hr.price as price_per_night,
-                (hb.dateto - hb.datefrom + 1) * hr.price AS total_price,
+                (hb.dateto - hb.datefrom) * hr.price AS total_price,
                 hg.name AS guest_name
             FROM hotel_bookings hb
             INNER JOIN hotel_rooms hr 
@@ -98,15 +101,17 @@ def create_booking(booking: Booking, guest: dict = Depends(validate_key)):
             guest_id,
             room_id,
             datefrom,
-            dateto
+            dateto,
+            addinfo
         ) VALUES (
-            %s, %s, %s, %s
+            %s, %s, %s, %s, %s
         ) RETURNING id
         """, [
             guest['id'], 
             booking.room_id, 
             booking.datefrom, 
-            booking.dateto
+            booking.dateto or booking.datefrom + timedelta(days=1), # default: lägg till en dag till datefrom
+            escape(booking.addinfo)
         ])
         new_id = cur.fetchone()['id']
 
