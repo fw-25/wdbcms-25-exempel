@@ -1,7 +1,7 @@
 import os, psycopg, uvicorn
 from psycopg.rows import dict_row
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import date
@@ -21,7 +21,6 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 
 # datamodell som ska valideras
 class Booking(BaseModel):
-    guest_id: int
     room_id: int
     datefrom: date # kräver: from datetime import date
     dateto: date
@@ -35,6 +34,7 @@ def validate_key(api_key: str = ""):
         guest = cur.fetchone()
         if not guest:
             raise HTTPException(status_code=401, detail={"error": "Bad API key!"})
+        print(f"Valid key: guest {guest['id']}, {guest['name']}")
         return guest
 
 @app.get("/temp")
@@ -70,7 +70,7 @@ def get_one_room(id: int):
 
 # Get bookings for current guest
 @app.get("/bookings")
-def get_bookings():
+def get_bookings(guest: dict = Depends(validate_key)):
     with conn.cursor() as cur:
         cur.execute("""
             SELECT 
@@ -85,13 +85,14 @@ def get_bookings():
                 ON hr.id = hb.room_id
             INNER JOIN hotel_guests hg
                 ON hg.id = hb.guest_id
-            ORDER BY hb.id DESC""")
+            WHERE hb.guest_id = %s
+            ORDER BY hb.id DESC""", [guest['id']])
         bookings = cur.fetchall()
         return bookings
 
 # Create booking
 @app.post("/bookings")
-def create_booking(booking: Booking):
+def create_booking(booking: Booking, guest: dict = Depends(validate_key)):
     with conn.cursor() as cur:
         cur.execute("""INSERT INTO hotel_bookings (
             guest_id,
@@ -102,7 +103,7 @@ def create_booking(booking: Booking):
             %s, %s, %s, %s
         ) RETURNING id
         """, [
-            booking.guest_id, 
+            guest['id'], 
             booking.room_id, 
             booking.datefrom, 
             booking.dateto
