@@ -36,14 +36,19 @@
             <th>Tot. Price</th>
             <th>Check-in</th>
             <th>Check-out</th>
+            <th>Info</th>
+            <th>Review</th>
         </tr>
         <tbody id="bookings"></tbody>
     </table>
 
 
     <script>
+        // Denna kunde också gärna sättas i LocalStorage
         const API_URL = 'http://vm4430.kaj.pouta.csc.fi:8004';
-        let api_key = localStorage.getItem('hotel_api_key') || prompt("Enter API-key")
+
+        // Funkar men kan göras på snyggare sätt en med prompt()...
+        let api_key = localStorage.getItem('hotel_api_key') || prompt("Enter API-key");
         localStorage.setItem('hotel_api_key', api_key);
 
         async function getRooms() {
@@ -80,6 +85,13 @@
                             <td>${b.total_price} €</td>
                             <td>${b.datefrom}</td>
                             <td>${b.dateto}</td>
+                            <td>${b.addinfo || ''}</td>
+                            <td><select>
+                                    <option value="1">*</option>
+                                    <option value="2">**</option>
+                                    <option value="3">***</option>
+                                </select>
+                                </td>
                         </tr>
                     `;
                 }
@@ -97,12 +109,17 @@
 
         async function saveBooking() {
             datefrom = document.querySelector('#datefrom').value;
+            dateto = document.querySelector('#dateto').value;
             if (!datefrom) return alert('Du måste välja startdatum');
 
             const booking = {
                 room_id: Number(document.querySelector('#room_id').value),
                 datefrom: datefrom,
-                dateto: document.querySelector('#dateto').value || datefrom
+                addinfo: document.querySelector('#addinfo').value
+            }
+
+            if (dateto) {
+                booking.dateto = dateto;
             }
 
             const resp = await fetch(`${API_URL}/bookings?api_key=${api_key}`, {

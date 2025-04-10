@@ -18,3 +18,12 @@ Content-Type: application/json
     "datefrom": "2025-05-01",
     "dateto": "2025-05-02"
 }
+
+###
+PUT {{apiUrl}}/bookings/15?api_key=asdasdasdasdasd
+Content-Type: application/json
+
+{
+    "stars": 5
+}
+
