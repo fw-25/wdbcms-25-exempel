@@ -13,6 +13,8 @@
     <select id="room_id">
         <!-- loopa rummen som <option> -->
     </select> 
+    <select id="guest_id">
+    </select>
 
     <p id="dates">
         Tidpunkt<br>
@@ -42,9 +44,7 @@
 
 
     <script>
-        const API_URL = 'http://vm4430.kaj.pouta.csc.fi:8004';
-        let api_key = localStorage.getItem('hotel_api_key') || prompt("Enter API-key")
-        localStorage.setItem('hotel_api_key', api_key);
+        const API_URL = 'http://vm4430.kaj.pouta.csc.fi:8003';
 
         async function getRooms() {
             const resp = await fetch(`${API_URL}/rooms`);
@@ -63,35 +63,35 @@
         };
         getRooms();
 
+        async function getGuests() {
+            const resp = await fetch(`${API_URL}/guests`);
+            const guests = await resp.json();
+
+            for (g of guests) {
+                document.querySelector('#guest_id').innerHTML += `
+                    <option value="${g.id}">${g.name} (${g.visits} besök)</option>
+                `;
+            }
+        };
+        getGuests();
 
         async function getBookings() {
-            
-            try {
-                const resp = await fetch(`${API_URL}/bookings?api_key=${api_key}`);
-                const bookings = await resp.json();
-                
-                document.querySelector('#bookings').innerHTML = '';
-                for (b of bookings) {
-                    document.querySelector('#bookings').innerHTML += `
-                        <tr>
-                            <td>${b.id}</td>
-                            <td>${b.room_number}</td>
-                            <td>${b.guest_name}</td>
-                            <td>${b.total_price} €</td>
-                            <td>${b.datefrom}</td>
-                            <td>${b.dateto}</td>
-                        </tr>
-                    `;
-                }
-                
-            } catch (err) {
-                document.querySelector('#bookings').innerHTML = `
-                    <span style="color:red;">ERROR, could not fetch bookings</span>
+            const resp = await fetch(`${API_URL}/bookings`);
+            const bookings = await resp.json();
+
+            document.querySelector('#bookings').innerHTML = '';
+            for (b of bookings) {
+                document.querySelector('#bookings').innerHTML += `
+                    <tr>
+                        <td>${b.id}</td>
+                        <td>${b.room_number}</td>
+                        <td>${b.guest_name}</td>
+                        <td>${b.total_price} €</td>
+                        <td>${b.datefrom}</td>
+                        <td>${b.dateto}</td>
+                    </tr>
                 `;
-                console.log(err)
             }
-
-
         };
         getBookings();
 
@@ -100,12 +100,13 @@
             if (!datefrom) return alert('Du måste välja startdatum');
 
             const booking = {
+                guest_id: Number(document.querySelector('#guest_id').value),
                 room_id: Number(document.querySelector('#room_id').value),
                 datefrom: datefrom,
                 dateto: document.querySelector('#dateto').value || datefrom
             }
 
-            const resp = await fetch(`${API_URL}/bookings?api_key=${api_key}`, {
+            const resp = await fetch(`${API_URL}/bookings`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(booking)
