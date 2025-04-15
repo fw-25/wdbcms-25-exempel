@@ -1,4 +1,5 @@
-@apiUrl = http://0.0.0.0:8003
+#@apiUrl = http://0.0.0.0:8003
+@apiUrl = http://vm4430.kaj.pouta.csc.fi:8004
 
 GET {{apiUrl}}/temp
 
@@ -20,10 +21,10 @@ Content-Type: application/json
 }
 
 ###
-PUT {{apiUrl}}/bookings/15?api_key=asdasdasdasdasd
+PUT {{apiUrl}}/bookings/32?api_key=228c76fdbf9d8e59131504cc82abd73f1481682e
 Content-Type: application/json
 
 {
-    "stars": 5
+    "stars": 3
 }
 
