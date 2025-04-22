@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headless WP Demo</title>
+</head>
+<body>
+    <h1 id="title"></h1>
+    <div id="content"></div>
+    
+    <script>
+        const PAGE_ID = 9;
+
+        async function getWpPage(id) {
+            const res = await fetch(`http://localhost:10004/wp-json/wp/v2/pages/${id}`);
+            const page = await res.json();
+
+            document.querySelector('#title').innerHTML = page.title.rendered;
+            document.querySelector('#content').innerHTML = page.content.rendered;
+            console.log(page);
+        }
+
+        getWpPage(PAGE_ID);
+    </script>
+</body>
+</html>
